@@ -116,6 +116,7 @@ export class RenovateRunner implements Runnable<RunOptions> {
     }
 
     const env: Record<string, string> = {
+      ...process.env,
       // setup logging
       LOG_FORMAT: 'json',
       LOG_LEVEL: 'debug',
@@ -143,6 +144,10 @@ export class RenovateRunner implements Runnable<RunOptions> {
     });
 
     return promise.then(result => {
+      result.stdout.on('data', (chunk: Buffer) => {
+        const line = chunk.toString();
+        this.logger.debug(`[RENOVATE-RAW]: ${line}`);
+      });
       return extractReport({
         logger,
         logStream: result.stdout,
